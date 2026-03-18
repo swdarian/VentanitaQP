@@ -1,0 +1,1041 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Ventanita QP</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+<style>
+  :root {
+    --yellow: #FFD600;
+    --yellow-light: #FFF59D;
+    --yellow-dark: #F9A825;
+    --red: #E53935;
+    --red-dark: #B71C1C;
+    --bg: #0D0D0D;
+    --bg2: #161616;
+    --bg3: #1F1F1F;
+    --text: #F5F5F5;
+    --text-muted: #9E9E9E;
+    --border: rgba(255,214,0,0.15);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    top: -50%; left: -50%;
+    width: 200%; height: 200%;
+    background:
+      radial-gradient(ellipse at 15% 25%, rgba(229,57,53,0.07) 0%, transparent 50%),
+      radial-gradient(ellipse at 85% 75%, rgba(255,214,0,0.07) 0%, transparent 50%);
+    animation: bgPulse 9s ease-in-out infinite alternate;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  @keyframes bgPulse {
+    0%   { transform: scale(1) rotate(0deg); opacity: 0.5; }
+    100% { transform: scale(1.1) rotate(4deg); opacity: 1; }
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 15px 28px;
+    background: rgba(13,13,13,0.88);
+    backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .nav-logo {
+    font-family: 'Bebas Neue', cursive;
+    font-size: 1.65rem;
+    letter-spacing: 2px;
+    background: linear-gradient(135deg, var(--yellow), var(--red));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .nav-links { display: flex; gap: 6px; }
+
+  .nav-btn {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    padding: 7px 15px;
+    border-radius: 50px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.25s;
+    letter-spacing: 0.4px;
+  }
+  .nav-btn:hover, .nav-btn.active {
+    background: var(--yellow);
+    color: #000;
+    border-color: var(--yellow);
+    font-weight: 600;
+  }
+
+  /* ── PAGES ── */
+  .page { display: none; min-height: 100vh; padding-top: 80px; position: relative; z-index: 1; }
+  .page.active { display: block; }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(28px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+  @keyframes popIn {
+    0%   { transform: scale(0) rotate(-10deg); }
+    70%  { transform: scale(1.15) rotate(2deg); }
+    100% { transform: scale(1) rotate(0deg); }
+  }
+  @keyframes shimmer {
+    0%   { background-position: -200% center; }
+    100% { background-position: 200% center; }
+  }
+  @keyframes pulse-glow {
+    0%, 100% { box-shadow: 0 0 20px rgba(255,214,0,0.15); }
+    50%       { box-shadow: 0 0 40px rgba(255,214,0,0.35); }
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50%       { transform: translateY(-6px); }
+  }
+
+  /* ── HERO ── */
+  .hero {
+    text-align: center;
+    padding: 56px 24px 32px;
+    animation: fadeUp 0.8s ease both;
+  }
+
+  .hero-badge {
+    display: inline-block;
+    background: rgba(255,214,0,0.1);
+    border: 1px solid rgba(255,214,0,0.28);
+    color: var(--yellow);
+    font-size: 0.72rem;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    padding: 6px 18px;
+    border-radius: 50px;
+    margin-bottom: 22px;
+    animation: fadeUp 0.8s 0.1s ease both;
+  }
+
+  .hero-title {
+    font-family: 'Bebas Neue', cursive;
+    font-size: clamp(3.8rem, 13vw, 7.5rem);
+    line-height: 0.93;
+    letter-spacing: 5px;
+    background: linear-gradient(135deg, var(--yellow) 20%, var(--red) 80%, var(--yellow) 120%);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: fadeUp 0.8s 0.2s ease both, shimmer 4s linear 1.5s infinite;
+    margin-bottom: 14px;
+  }
+
+  .hero-sub {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    font-weight: 300;
+    letter-spacing: 1px;
+    animation: fadeUp 0.8s 0.3s ease both;
+    margin-bottom: 44px;
+    font-style: italic;
+  }
+
+  /* ── INFO GRID ── */
+  .info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    gap: 14px;
+    max-width: 860px;
+    margin: 0 auto 44px;
+    padding: 0 24px;
+  }
+
+  .info-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 24px 20px;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .info-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255,214,0,0.05), transparent 60%);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .info-card:hover { border-color: rgba(255,214,0,0.4); transform: translateY(-4px); animation: pulse-glow 2s ease infinite; }
+  .info-card:hover::before { opacity: 1; }
+
+  .info-card:nth-child(1) { animation: fadeUp 0.7s 0.35s ease both; }
+  .info-card:nth-child(2) { animation: fadeUp 0.7s 0.48s ease both; }
+  .info-card:nth-child(3) { animation: fadeUp 0.7s 0.61s ease both; }
+
+  .info-icon { font-size: 1.5rem; margin-bottom: 12px; display: block; animation: float 3s ease-in-out infinite; }
+  .info-card:nth-child(2) .info-icon { animation-delay: 0.5s; }
+  .info-card:nth-child(3) .info-icon { animation-delay: 1s; }
+
+  .info-label {
+    font-size: 0.68rem;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: var(--yellow);
+    margin-bottom: 10px;
+    font-weight: 600;
+  }
+
+  .info-value {
+    font-size: 0.9rem;
+    color: var(--text);
+    line-height: 1.65;
+    font-weight: 400;
+  }
+
+  .schedule-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    font-size: 0.85rem;
+  }
+  .schedule-row:last-child { border-bottom: none; }
+  .schedule-day { color: var(--text-muted); }
+  .schedule-hours { color: var(--yellow); font-weight: 500; font-size: 0.8rem; }
+
+  /* ── QR SECTION ── */
+  .qr-section {
+    text-align: center;
+    padding: 0 24px 52px;
+    animation: fadeUp 0.8s 0.7s ease both;
+  }
+
+  .qr-label {
+    font-size: 0.7rem;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 16px;
+  }
+
+  .qr-box {
+    display: inline-block;
+    background: #fff;
+    border-radius: 18px;
+    padding: 16px;
+    box-shadow: 0 0 0 1px rgba(255,214,0,0.2), 0 0 40px rgba(255,214,0,0.2);
+    transition: box-shadow 0.3s;
+    animation: float 4s ease-in-out 1s infinite;
+  }
+  .qr-box:hover { box-shadow: 0 0 0 2px var(--yellow), 0 0 60px rgba(255,214,0,0.35); }
+
+  #qrcode canvas, #qrcode img { border-radius: 8px; display: block; }
+
+  .qr-note {
+    margin-top: 14px;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    font-style: italic;
+  }
+
+  /* ── DIVIDER ── */
+  .section-divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border), transparent);
+    max-width: 860px;
+    margin: 0 auto 44px;
+  }
+
+  /* ── CONTACT BTN ── */
+  .contact-section {
+    text-align: center;
+    padding: 0 24px 56px;
+    animation: fadeUp 0.8s 0.8s ease both;
+  }
+
+  .btn-contact {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 16px 36px;
+    background: linear-gradient(135deg, var(--red), var(--red-dark));
+    color: #fff;
+    border: none;
+    border-radius: 50px;
+    font-family: 'Bebas Neue', cursive;
+    font-size: 1.15rem;
+    letter-spacing: 2px;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-decoration: none;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn-contact::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.15), transparent);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .btn-contact:hover { transform: translateY(-3px); box-shadow: 0 10px 28px rgba(229,57,53,0.4); }
+  .btn-contact:hover::after { opacity: 1; }
+  .btn-contact:active { transform: translateY(-1px); }
+
+  .contact-sub {
+    margin-top: 10px;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+  }
+
+  /* ── FORM PAGE ── */
+  .form-wrapper {
+    max-width: 540px;
+    margin: 0 auto;
+    padding: 44px 24px 80px;
+    animation: fadeUp 0.7s ease both;
+  }
+
+  .page-title {
+    font-family: 'Bebas Neue', cursive;
+    font-size: 2.8rem;
+    letter-spacing: 3px;
+    background: linear-gradient(135deg, var(--yellow), var(--red));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 6px;
+  }
+
+  .page-desc {
+    color: var(--text-muted);
+    font-size: 0.88rem;
+    margin-bottom: 36px;
+    line-height: 1.65;
+  }
+
+  .form-group { margin-bottom: 26px; }
+
+  label {
+    display: block;
+    font-size: 0.72rem;
+    letter-spacing: 1.8px;
+    text-transform: uppercase;
+    color: var(--yellow);
+    margin-bottom: 10px;
+    font-weight: 600;
+  }
+
+  input[type="text"],
+  input[type="password"],
+  textarea {
+    width: 100%;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 18px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    transition: all 0.25s;
+    outline: none;
+    resize: vertical;
+  }
+
+  input:focus, textarea:focus {
+    border-color: var(--yellow);
+    background: var(--bg3);
+    box-shadow: 0 0 0 3px rgba(255,214,0,0.1);
+  }
+
+  textarea { min-height: 110px; }
+
+  /* ── STAR / NUMBER RATING ── */
+  .stars-wrapper { display: flex; gap: 6px; flex-wrap: wrap; }
+
+  .star-btn {
+    width: 44px; height: 44px;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text-muted);
+    font-size: 0.92rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .star-btn:hover { background: rgba(255,214,0,0.15); border-color: var(--yellow); transform: scale(1.08); }
+  .star-btn.selected { background: var(--yellow); color: #000; border-color: var(--yellow); transform: scale(1.1); }
+
+  /* ── TAGS ── */
+  .tags-wrapper { display: flex; gap: 8px; flex-wrap: wrap; }
+
+  .tag-btn {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 50px;
+    padding: 8px 16px;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .tag-btn:hover { border-color: var(--red); color: var(--text); }
+  .tag-btn.selected { background: var(--red); color: #fff; border-color: var(--red); }
+
+  /* ── BUTTONS ── */
+  .btn-primary {
+    width: 100%;
+    padding: 16px;
+    background: linear-gradient(135deg, var(--yellow), var(--yellow-dark));
+    color: #000;
+    border: none;
+    border-radius: 14px;
+    font-family: 'Bebas Neue', cursive;
+    font-size: 1.2rem;
+    letter-spacing: 2px;
+    cursor: pointer;
+    transition: all 0.3s;
+    margin-top: 8px;
+    position: relative;
+    overflow: hidden;
+  }
+  .btn-primary::after {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.2), transparent);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(255,214,0,0.35); }
+  .btn-primary:hover::after { opacity: 1; }
+  .btn-primary:active { transform: translateY(0); }
+
+  /* ── SUCCESS ── */
+  .success-msg {
+    display: none;
+    text-align: center;
+    padding: 48px 24px;
+    animation: fadeUp 0.5s ease;
+  }
+  .success-icon { font-size: 3.5rem; margin-bottom: 16px; display: block; animation: popIn 0.6s cubic-bezier(.36,.07,.19,.97); }
+  .success-msg h2 { font-family: 'Bebas Neue', cursive; font-size: 2.2rem; letter-spacing: 3px; color: var(--yellow); margin-bottom: 8px; }
+  .success-msg p { color: var(--text-muted); font-size: 0.9rem; line-height: 1.6; }
+
+  /* ── OPINIONS PAGE ── */
+  .opinions-wrapper {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 44px 24px 80px;
+  }
+
+  /* ── PASSWORD GATE ── */
+  .password-gate {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 44px 32px;
+    text-align: center;
+    animation: fadeUp 0.7s ease;
+    max-width: 380px;
+    margin: 60px auto 0;
+  }
+
+  .lock-icon { font-size: 2.6rem; margin-bottom: 18px; display: block; animation: float 3s ease-in-out infinite; }
+
+  .gate-title {
+    font-family: 'Bebas Neue', cursive;
+    font-size: 1.9rem;
+    letter-spacing: 2px;
+    color: var(--yellow);
+    margin-bottom: 6px;
+  }
+
+  .gate-desc { color: var(--text-muted); font-size: 0.85rem; margin-bottom: 28px; line-height: 1.5; }
+
+  .error-msg {
+    color: var(--red);
+    font-size: 0.8rem;
+    margin-top: 10px;
+    display: none;
+    animation: fadeIn 0.3s ease;
+  }
+
+  /* ── REVIEW CARDS ── */
+  .reviews-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .reviews-count {
+    font-size: 0.75rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .avg-score {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .avg-number {
+    font-family: 'Bebas Neue', cursive;
+    font-size: 2.6rem;
+    line-height: 1;
+    color: var(--yellow);
+  }
+
+  .avg-label { color: var(--text-muted); font-size: 0.78rem; }
+
+  .review-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 22px 20px;
+    margin-bottom: 14px;
+    transition: all 0.25s;
+    animation: fadeUp 0.5s ease both;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .review-card::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: linear-gradient(180deg, var(--yellow), var(--red));
+    border-radius: 3px 0 0 3px;
+  }
+
+  .review-card:hover { border-color: rgba(255,214,0,0.3); transform: translateX(3px); }
+
+  .review-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 10px;
+    gap: 12px;
+  }
+
+  .review-name {
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: var(--text);
+  }
+
+  .review-tags-row {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-bottom: 2px;
+  }
+
+  .review-tag {
+    background: rgba(229,57,53,0.15);
+    color: var(--red);
+    font-size: 0.7rem;
+    padding: 3px 10px;
+    border-radius: 50px;
+    border: 1px solid rgba(229,57,53,0.25);
+  }
+
+  .review-score {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    background: rgba(255,214,0,0.1);
+    border: 1px solid rgba(255,214,0,0.25);
+    padding: 5px 12px;
+    border-radius: 50px;
+    flex-shrink: 0;
+  }
+
+  .score-num {
+    font-family: 'Bebas Neue', cursive;
+    font-size: 1.15rem;
+    color: var(--yellow);
+    line-height: 1;
+  }
+
+  .score-den { font-size: 0.72rem; color: var(--text-muted); }
+
+  .review-opinion {
+    color: var(--text-muted);
+    font-size: 0.88rem;
+    line-height: 1.6;
+    margin-bottom: 12px;
+  }
+
+  .review-meta {
+    font-size: 0.72rem;
+    color: rgba(255,255,255,0.25);
+    letter-spacing: 0.5px;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 64px 24px;
+    color: var(--text-muted);
+  }
+
+  .empty-icon { font-size: 2.8rem; margin-bottom: 16px; display: block; opacity: 0.4; }
+  .empty-state p { font-size: 0.88rem; line-height: 1.6; }
+
+  .btn-logout {
+    background: none;
+    border: 1px solid rgba(229,57,53,0.3);
+    color: var(--red);
+    padding: 8px 18px;
+    border-radius: 50px;
+    font-size: 0.78rem;
+    cursor: pointer;
+    transition: all 0.25s;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .btn-logout:hover { background: rgba(229,57,53,0.1); border-color: var(--red); }
+
+  /* ── SCROLLBAR ── */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: rgba(255,214,0,0.2); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: rgba(255,214,0,0.4); }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 480px) {
+    .nav-btn { padding: 6px 10px; font-size: 0.74rem; }
+    .info-grid { grid-template-columns: 1fr; }
+    .stars-wrapper { gap: 4px; }
+    .star-btn { width: 38px; height: 38px; font-size: 0.85rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ── NAV ── -->
+<nav>
+  <div class="nav-logo">Ventanita QP</div>
+  <div class="nav-links">
+    <button class="nav-btn active" onclick="showPage('home')">Inicio</button>
+    <button class="nav-btn" onclick="showPage('feedback')">Feedback</button>
+    <button class="nav-btn" onclick="showPage('opinions')">Opiniones</button>
+  </div>
+</nav>
+
+<!-- ══════════════════════════════════════════
+     HOME PAGE
+══════════════════════════════════════════ -->
+<div id="page-home" class="page active">
+
+  <div class="hero">
+    <div class="hero-badge">☀️ Soda & Comida • Pavas, Costa Rica</div>
+    <h1 class="hero-title">Ventanita<br/>QP</h1>
+    <p class="hero-sub">Comida fresca, sabor real, sin complicaciones.</p>
+  </div>
+
+  <div class="info-grid">
+    <!-- Ubicación -->
+    <div class="info-card">
+      <span class="info-icon">📍</span>
+      <div class="info-label">Ubicación</div>
+      <div class="info-value">
+        Pavas, San José<br/>
+        Costa Rica
+      </div>
+    </div>
+
+    <!-- Horario -->
+    <div class="info-card">
+      <span class="info-icon">🕐</span>
+      <div class="info-label">Horario</div>
+      <div class="info-value">
+        <div class="schedule-row">
+          <span class="schedule-day">Lun – Jue</span>
+          <span class="schedule-hours">11:00 am – 10:00 pm</span>
+        </div>
+        <div class="schedule-row">
+          <span class="schedule-day">Vie – Sáb</span>
+          <span class="schedule-hours">11:00 am – 11:00 pm</span>
+        </div>
+        <div class="schedule-row">
+          <span class="schedule-day">Domingo</span>
+          <span class="schedule-hours" style="color:var(--text-muted);">Cerrado</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Contacto rápido -->
+    <div class="info-card">
+      <span class="info-icon">📲</span>
+      <div class="info-label">Contacto</div>
+      <div class="info-value">
+        <div class="schedule-row">
+          <span class="schedule-day">WhatsApp</span>
+          <span class="schedule-hours">7054-0675</span>
+        </div>
+        <div class="schedule-row" style="padding-top:10px;">
+          <span class="schedule-day" style="font-size:0.78rem;">¿Tu opinión importa?</span>
+        </div>
+        <button class="tag-btn selected" style="margin-top:8px;font-size:0.78rem;" onclick="showPage('feedback')">Déjanos un feedback →</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-divider"></div>
+
+  <!-- QR -->
+  <div class="qr-section">
+    <div class="qr-label">📱 Escanea para compartir</div>
+    <div class="qr-box">
+      <div id="qrcode"></div>
+    </div>
+    <div class="qr-note">El QR lleva directo a esta página</div>
+    <div style="margin-top:18px;">
+      <a id="page-link" href="#" target="_blank" style="color:var(--yellow);font-size:0.82rem;text-decoration:none;border-bottom:1px solid rgba(255,214,0,0.3);padding-bottom:2px;letter-spacing:0.5px;"></a>
+    </div>
+  </div>
+
+  <div class="section-divider"></div>
+
+  <!-- Contact Button -->
+  <div class="contact-section">
+    <a href="https://wa.me/50670540675" class="btn-contact" target="_blank">
+      <span>💬</span> Contáctanos
+    </a>
+    <div class="contact-sub">WhatsApp · 7054-0675</div>
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════════════════
+     FEEDBACK PAGE
+══════════════════════════════════════════ -->
+<div id="page-feedback" class="page">
+  <div class="form-wrapper">
+
+    <!-- FORM -->
+    <div id="feedback-form-area">
+      <div class="page-title">Tu Opinión</div>
+      <p class="page-desc">Ayudanos a mejorar. Tu feedback es lo que nos impulsa a dar lo mejor cada día. 🙌</p>
+
+      <div class="form-group">
+        <label>Tu nombre</label>
+        <input type="text" id="f-name" placeholder="¿Cómo te llamas?" maxlength="60"/>
+      </div>
+
+      <div class="form-group">
+        <label>Puntuación · 1 al 10</label>
+        <div class="stars-wrapper" id="rating-btns"></div>
+      </div>
+
+      <div class="form-group">
+        <label>¿Qué te pareció?</label>
+        <div class="tags-wrapper" id="tag-btns">
+          <button class="tag-btn" onclick="toggleTag(this,'Excelente comida')">🍽️ Excelente comida</button>
+          <button class="tag-btn" onclick="toggleTag(this,'Buen precio')">💰 Buen precio</button>
+          <button class="tag-btn" onclick="toggleTag(this,'Rápido')">⚡ Rápido</button>
+          <button class="tag-btn" onclick="toggleTag(this,'Buen ambiente')">😊 Buen ambiente</button>
+          <button class="tag-btn" onclick="toggleTag(this,'Porciones grandes')">🤤 Porciones grandes</button>
+          <button class="tag-btn" onclick="toggleTag(this,'Mejorar servicio')">🔧 Mejorar servicio</button>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Tu comentario</label>
+        <textarea id="f-opinion" placeholder="Cuéntanos tu experiencia... ¿qué te gustó? ¿qué mejorarías?"></textarea>
+      </div>
+
+      <button class="btn-primary" onclick="submitFeedback()">Enviar Feedback 🚀</button>
+    </div>
+
+    <!-- SUCCESS -->
+    <div class="success-msg" id="success-msg">
+      <span class="success-icon">🎉</span>
+      <h2>¡Gracias!</h2>
+      <p>Tu opinión fue registrada.<br/>Nos ayuda a mejorar cada día.</p>
+      <button class="btn-primary" style="margin-top:28px;max-width:260px;margin-inline:auto;" onclick="resetForm()">Enviar otro feedback</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     OPINIONS PAGE
+══════════════════════════════════════════ -->
+<div id="page-opinions" class="page">
+  <div class="opinions-wrapper">
+
+    <!-- PASSWORD GATE -->
+    <div id="password-gate" class="password-gate">
+      <span class="lock-icon">🔒</span>
+      <div class="gate-title">Zona Privada</div>
+      <p class="gate-desc">Esta sección es solo para el equipo de Ventanita QP.<br/>Ingresa la contraseña para ver las opiniones.</p>
+      <div class="form-group" style="text-align:left;">
+        <label>Contraseña</label>
+        <input type="password" id="gate-password" placeholder="••••••••••••" onkeydown="if(event.key==='Enter')checkPassword()"/>
+        <div class="error-msg" id="gate-error">Contraseña incorrecta. Inténtalo de nuevo.</div>
+      </div>
+      <button class="btn-primary" onclick="checkPassword()">Ingresar</button>
+    </div>
+
+    <!-- REVIEWS LIST -->
+    <div id="reviews-panel" style="display:none; animation: fadeUp 0.6s ease;">
+      <div class="reviews-header">
+        <div>
+          <div class="page-title" style="margin-bottom:4px;">Opiniones</div>
+          <div class="reviews-count" id="reviews-count">Cargando...</div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px;">
+          <div class="avg-score">
+            <div>
+              <div class="avg-number" id="avg-score">–</div>
+              <div class="avg-label">Promedio / 10</div>
+            </div>
+          </div>
+          <button class="btn-logout" onclick="lockOpinions()">🔒 Cerrar</button>
+        </div>
+      </div>
+
+      <div id="reviews-list"></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// ── STATE ──
+let selectedRating = 0;
+let selectedTags   = [];
+
+// ── RATING BUTTONS ──
+const ratingContainer = document.getElementById('rating-btns');
+for (let i = 1; i <= 10; i++) {
+  const btn = document.createElement('button');
+  btn.className = 'star-btn';
+  btn.textContent = i;
+  btn.onclick = () => selectRating(i);
+  ratingContainer.appendChild(btn);
+}
+
+function selectRating(n) {
+  selectedRating = n;
+  document.querySelectorAll('.star-btn').forEach((b, idx) => {
+    b.classList.toggle('selected', idx < n);
+  });
+}
+
+// ── TAGS ──
+function toggleTag(el, tag) {
+  el.classList.toggle('selected');
+  if (el.classList.contains('selected')) {
+    selectedTags.push(tag);
+  } else {
+    selectedTags = selectedTags.filter(t => t !== tag);
+  }
+}
+
+// ── SUBMIT FEEDBACK ──
+function submitFeedback() {
+  const name    = document.getElementById('f-name').value.trim();
+  const opinion = document.getElementById('f-opinion').value.trim();
+
+  if (!name) { alert('Por favor ingresa tu nombre.'); return; }
+  if (!selectedRating) { alert('Por favor selecciona una puntuación.'); return; }
+
+  const review = {
+    id:        Date.now(),
+    name,
+    rating:    selectedRating,
+    tags:      [...selectedTags],
+    opinion,
+    timestamp: new Date().toISOString()
+  };
+
+  const stored = JSON.parse(localStorage.getItem('vqp_reviews') || '[]');
+  stored.unshift(review);
+  localStorage.setItem('vqp_reviews', JSON.stringify(stored));
+
+  document.getElementById('feedback-form-area').style.display = 'none';
+  const s = document.getElementById('success-msg');
+  s.style.display = 'block';
+}
+
+// ── RESET FORM ──
+function resetForm() {
+  document.getElementById('f-name').value = '';
+  document.getElementById('f-opinion').value = '';
+  selectedRating = 0;
+  selectedTags   = [];
+  document.querySelectorAll('.star-btn').forEach(b => b.classList.remove('selected'));
+  document.querySelectorAll('.tag-btn').forEach(b  => b.classList.remove('selected'));
+  document.getElementById('feedback-form-area').style.display = 'block';
+  document.getElementById('success-msg').style.display = 'none';
+}
+
+// ── PASSWORD CHECK ──
+const CORRECT_PASS = 'ventanitaQP2026';
+let unlocked = false;
+
+function checkPassword() {
+  const val = document.getElementById('gate-password').value;
+  const err = document.getElementById('gate-error');
+  if (val === CORRECT_PASS) {
+    unlocked = true;
+    document.getElementById('password-gate').style.display   = 'none';
+    document.getElementById('reviews-panel').style.display   = 'block';
+    loadReviews();
+  } else {
+    err.style.display = 'block';
+    document.getElementById('gate-password').value = '';
+    document.getElementById('gate-password').focus();
+  }
+}
+
+function lockOpinions() {
+  unlocked = false;
+  document.getElementById('password-gate').style.display   = 'flex';
+  document.getElementById('password-gate').style.display   = 'block';
+  document.getElementById('reviews-panel').style.display   = 'none';
+  document.getElementById('gate-password').value = '';
+  document.getElementById('gate-error').style.display = 'none';
+}
+
+// ── FORMAT DATE ──
+function formatDate(iso) {
+  const d = new Date(iso);
+  const date = d.toLocaleDateString('es-CR', { day:'2-digit', month:'long', year:'numeric' });
+  const time = d.toLocaleTimeString('es-CR', { hour:'2-digit', minute:'2-digit', second:'2-digit' });
+  return `${date} · ${time}`;
+}
+
+// ── LOAD REVIEWS ──
+function loadReviews() {
+  const reviews = JSON.parse(localStorage.getItem('vqp_reviews') || '[]');
+  const list    = document.getElementById('reviews-list');
+  const countEl = document.getElementById('reviews-count');
+  const avgEl   = document.getElementById('avg-score');
+
+  countEl.textContent = reviews.length === 0
+    ? 'Sin opiniones aún'
+    : `${reviews.length} opinión${reviews.length !== 1 ? 'es' : ''} recibida${reviews.length !== 1 ? 's' : ''}`;
+
+  if (reviews.length > 0) {
+    const avg = (reviews.reduce((s, r) => s + r.rating, 0) / reviews.length).toFixed(1);
+    avgEl.textContent = avg;
+  } else {
+    avgEl.textContent = '–';
+  }
+
+  if (reviews.length === 0) {
+    list.innerHTML = `
+      <div class="empty-state">
+        <span class="empty-icon">📭</span>
+        <p>Aún no hay opiniones.<br/>¡Comparte el link o QR para empezar a recibir feedback!</p>
+      </div>`;
+    return;
+  }
+
+  list.innerHTML = reviews.map((r, i) => `
+    <div class="review-card" style="animation-delay:${i * 0.06}s">
+      <div class="review-top">
+        <div>
+          <div class="review-name">👤 ${escHtml(r.name)}</div>
+          ${r.tags && r.tags.length ? `
+            <div class="review-tags-row" style="margin-top:6px;">
+              ${r.tags.map(t => `<span class="review-tag">${escHtml(t)}</span>`).join('')}
+            </div>` : ''}
+        </div>
+        <div class="review-score">
+          <span class="score-num">${r.rating}</span>
+          <span class="score-den">/10</span>
+        </div>
+      </div>
+      ${r.opinion ? `<div class="review-opinion">"${escHtml(r.opinion)}"</div>` : ''}
+      <div class="review-meta">🕐 ${formatDate(r.timestamp)}</div>
+    </div>
+  `).join('');
+}
+
+function escHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ── PAGE NAVIGATION ──
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  const btns = document.querySelectorAll('.nav-btn');
+  const idx  = { home: 0, feedback: 1, opinions: 2 };
+  btns[idx[id]].classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  if (id === 'opinions' && unlocked) {
+    document.getElementById('password-gate').style.display = 'none';
+    document.getElementById('reviews-panel').style.display = 'block';
+    loadReviews();
+  }
+}
+
+// ── QR CODE (usa URL actual de la página) ──
+window.addEventListener('load', () => {
+  const url = window.location.href.split('?')[0].split('#')[0] || 'https://ventanitaqp.com';
+  const linkEl = document.getElementById('page-link');
+  linkEl.href = url;
+  linkEl.textContent = url;
+
+  QRCode.toCanvas(document.createElement('canvas'), url, {
+    width: 180,
+    margin: 1,
+    color: { dark: '#000000', light: '#ffffff' }
+  }, (err, canvas) => {
+    if (!err) document.getElementById('qrcode').appendChild(canvas);
+  });
+});
+</script>
+</body>
+</html>
